@@ -2,10 +2,6 @@
 
 🚀 **LLMアプリケーションにKaggle APIの機能をシームレスに提供するModel Context Protocol (MCP) サーバー**
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![FastMCP](https://img.shields.io/badge/FastMCP-enabled-green.svg)](https://github.com/jlowin/fastmcp)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 ## ✨ 主な機能
 
 ### 🏆 コンペティション管理
@@ -25,6 +21,10 @@
 ### 📚 スマートリソース
 - **アクティブコンペ** - リアルタイム更新されるリソース
 - **人気データセット** - 自動キュレーションされた情報
+- **トレンドトピック** - 最新の技術動向とテクニック
+- **締切カレンダー** - コンペティション締切の一覧
+- **初心者ガイド** - 学習パスと推奨コンペ
+- **プラットフォーム統計** - Kaggleの統計情報
 
 ## 🚀 クイックスタート
 
@@ -33,9 +33,6 @@
 ```bash
 # uv使用（推奨）
 uv sync
-
-# 従来のpip
-pip install kaggle fastmcp python-dotenv
 ```
 
 ### 認証設定
@@ -70,11 +67,27 @@ uv run mcp dev src/kaggle_mcp_server/server.py
 python -m kaggle_mcp_server
 ```
 
-### Claude Desktop統合
+### MCP設定
 
-```bash
-# MCPサーバーとしてインストール
-uv run mcp install src/kaggle_mcp_server/server.py --name "Kaggle MCP Server"
+以下設定をすればMCPサーバとして使えます。
+
+`</path/to/kaggle-mcp-server>`には、Kaggle MCP Serverの絶対パスを指定してください。
+
+```json
+{
+  "mcpServers": {
+    "kaggle-mcp-server": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "</path/to/kaggle-mcp-server>",
+        "-m",
+        "kaggle_mcp_server"
+      ]
+    }
+  }
+}
 ```
 
 ## 🛠️ 利用可能なツール
@@ -95,6 +108,10 @@ uv run mcp install src/kaggle_mcp_server/server.py --name "Kaggle MCP Server"
 |------------|------|---------|
 | `kaggle://competitions/active` | 現在アクティブなコンペティション | ✅ |
 | `kaggle://datasets/popular` | トレンドと人気のデータセット | ✅ |
+| `kaggle://trends/hot-topics` | トレンディングトピックと技術 | ✅ |
+| `kaggle://calendar/deadlines` | コンペティション締切カレンダー | ✅ |
+| `kaggle://beginner/getting-started` | 初心者向けガイドと学習パス | ✅ |
+| `kaggle://meta/platform-stats` | Kaggleプラットフォーム統計 | ✅ |
 
 ## 💻 使用例
 
@@ -122,89 +139,6 @@ uv run mcp install src/kaggle_mcp_server/server.py --name "Kaggle MCP Server"
 # 使用ツール: search_datasets → download_dataset（自動展開付き）
 ```
 
-## 🔧 設定
-
-### 環境変数
-```bash
-KAGGLE_USERNAME=あなたのユーザー名    # 必須: Kaggleユーザー名
-KAGGLE_KEY=あなたのAPIキー          # 必須: Kaggle APIキー
-MCP_CACHE_TTL=300                  # オプション: キャッシュ期間（秒）
-MCP_DEBUG=false                    # オプション: デバッグログ有効化
-```
-
-### 高度な設定
-```bash
-# カスタムダウンロードディレクトリ
-export KAGGLE_DOWNLOAD_PATH="./data"
-
-# 接続タイムアウト
-export KAGGLE_TIMEOUT=30
-```
-
-## 🏗️ アーキテクチャ
-
-```
-┌─────────────────────────────────────────┐
-│           MCPインターフェース層          │  ← FastMCPプロトコル
-├─────────────────────────────────────────┤
-│         ビジネスロジック層              │  ← Competition/Dataset/Modelサービス
-├─────────────────────────────────────────┤
-│        インフラストラクチャ層            │  ← 認証、キャッシュ、エラーハンドリング
-├─────────────────────────────────────────┤
-│         データアクセス層                │  ← Kaggle APIクライアント
-└─────────────────────────────────────────┘
-```
-
-## 🔒 セキュリティ機能
-
-- ✅ **安全な認証情報管理** - 環境変数による管理
-- ✅ **入力値検証** - バリデーションとサニタイゼーション
-- ✅ **読み取り専用設計** - データ変更操作なし
-- ✅ **安全なファイルパス処理** - ディレクトリ制限付き
-- ✅ **エラーメッセージ最適化** - 情報漏洩防止
-
-## ⚡ パフォーマンス最適化
-
-- 🚀 **インテリジェントキャッシュ** - TTLベース無効化
-- 🔄 **非同期処理** - 並行操作対応
-- 🌐 **コネクションプール** - 効率的なAPI通信
-- 📦 **ストリーミングDL** - 大容量ファイル対応
-
-## 🧪 テスト
-
-```bash
-# テスト実行（基本テストは認証不要）
-uv run python test_server.py
-
-# 認証ありテスト
-export KAGGLE_USERNAME=test_user
-export KAGGLE_KEY=test_key
-python test_server.py
-```
-
-## 🚫 現在の制限事項
-
-- **読み取り専用**: データ変更機能なし
-- **ファイルサイズ制限**: 大容量DLでタイムアウトの可能性
-- **レート制限**: Kaggle API制限に従う
-- **ディスカッション未対応**: Kaggle APIが未サポート
-
-## 🗂️ プロジェクト構成
-
-```
-kaggle-mcp-server/
-├── src/kaggle_mcp_server/
-│   ├── server.py          # メインMCPサーバー実装
-│   ├── config.py          # 設定管理
-│   ├── utils.py           # ユーティリティとエラーハンドリング
-│   └── __init__.py
-├── docs/                  # ドキュメント
-├── tests/                 # テストスイート
-├── pyproject.toml         # プロジェクト設定
-├── CLAUDE.md             # 開発ガイドライン
-├── design.md             # アーキテクチャドキュメント
-└── README.md             # このファイル
-```
 
 ## 🤝 コントリビューション
 
@@ -216,23 +150,6 @@ kaggle-mcp-server/
 6. **ブランチにプッシュ**: `git push origin feature/素晴らしい機能`
 7. **プルリクエストを開く**
 
-## 🐛 トラブルシューティング
-
-### 認証問題
-```bash
-# 認証情報確認
-kaggle competitions list
-
-# 環境変数確認
-echo $KAGGLE_USERNAME
-echo $KAGGLE_KEY
-```
-
-### 接続問題
-```bash
-# Kaggle API接続テスト
-python -c "from kaggle.api.kaggle_api_extended import KaggleApi; api = KaggleApi(); api.authenticate(); print('OK')"
-```
 
 ### よくあるエラー
 - **`401 Unauthorized`**: API認証情報を確認
@@ -249,13 +166,3 @@ python -c "from kaggle.api.kaggle_api_extended import KaggleApi; api = KaggleApi
 - **Kaggleチーム** - 優秀なAPIの提供
 - **FastMCP** - 堅牢なMCPフレームワーク
 - **Model Context Protocol** - LLM統合の標準化
-
-## 📞 サポート
-
-- 📖 **ドキュメント**: [設計文書](docs/design.md)
-- 🐛 **課題報告**: [GitHub Issues](https://github.com/your-username/kaggle-mcp-server/issues)
-- 💬 **ディスカッション**: [GitHub Discussions](https://github.com/your-username/kaggle-mcp-server/discussions)
-
----
-
-**❤️ データサイエンスコミュニティのために作られました**
