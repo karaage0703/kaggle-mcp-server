@@ -160,7 +160,10 @@ def get_competition_details(competition_id: str) -> Dict[str, Any]:
             (
                 c
                 for c in competitions
-                if str(c.id) == str(competition_id) or c.id == competition_id
+                if str(c.id) == str(competition_id) 
+                or c.id == competition_id
+                or getattr(c, 'ref', '') == competition_id
+                or getattr(c, 'url', '').endswith(f'/{competition_id}')
             ),
             None,
         )
